@@ -7,17 +7,17 @@ import com.brainbackdoor.subwaymap.map.dto.PathResponse;
 import com.brainbackdoor.subwaymap.map.dto.PathResponseAssembler;
 import com.brainbackdoor.subwaymap.station.application.StationService;
 import com.brainbackdoor.subwaymap.station.domain.Station;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
 public class MapService {
-    private LineService lineService;
-    private StationService stationService;
-    private PathService pathService;
+
+    private final LineService lineService;
+    private final StationService stationService;
+    private final PathService pathService;
 
     public MapService(LineService lineService, StationService stationService, PathService pathService) {
         this.lineService = lineService;

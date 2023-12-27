@@ -1,5 +1,7 @@
 package com.brainbackdoor.subwaymap.line.acceptance;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.brainbackdoor.subwaymap.AcceptanceTest;
 import com.brainbackdoor.subwaymap.line.dto.LineResponse;
 import com.brainbackdoor.subwaymap.station.StationAcceptanceTest;
@@ -7,22 +9,20 @@ import com.brainbackdoor.subwaymap.station.dto.StationResponse;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DisplayName("지하철 노선에 역 등록 관련 기능")
 public class LineSectionAcceptanceTest extends AcceptanceTest {
+
     private LineResponse 신분당선;
     private StationResponse 강남역;
     private StationResponse 양재역;
@@ -42,8 +42,8 @@ public class LineSectionAcceptanceTest extends AcceptanceTest {
         lineCreateParams = new HashMap<>();
         lineCreateParams.put("name", "신분당선");
         lineCreateParams.put("color", "bg-red-600");
-        lineCreateParams.put("upStationId", 강남역.getId() + "");
-        lineCreateParams.put("downStationId", 광교역.getId() + "");
+        lineCreateParams.put("upStationId", 강남역.id() + "");
+        lineCreateParams.put("downStationId", 광교역.id() + "");
         lineCreateParams.put("distance", 10 + "");
         신분당선 = LineAcceptanceTest.지하철_노선_등록되어_있음(lineCreateParams).as(LineResponse.class);
     }
@@ -119,20 +119,21 @@ public class LineSectionAcceptanceTest extends AcceptanceTest {
         지하철_노선에_지하철역_제외_실패됨(removeResponse);
     }
 
-    public static ExtractableResponse<Response> 지하철_노선에_지하철역_등록_요청(LineResponse line, StationResponse upStation, StationResponse downStation, int distance) {
+    public static ExtractableResponse<Response> 지하철_노선에_지하철역_등록_요청(LineResponse line, StationResponse upStation,
+                                                                   StationResponse downStation, int distance) {
         Map<String, String> params = new HashMap<>();
-        params.put("upStationId", upStation.getId() + "");
-        params.put("downStationId", downStation.getId() + "");
+        params.put("upStationId", upStation.id() + "");
+        params.put("downStationId", downStation.id() + "");
         params.put("distance", distance + "");
 
         return RestAssured.given().log().all().
-                contentType(MediaType.APPLICATION_JSON_VALUE).
-                body(params).
-                when().
-                post("/lines/{lineId}/sections", line.getId()).
-                then().
-                log().all().
-                extract();
+            contentType(MediaType.APPLICATION_JSON_VALUE).
+            body(params).
+            when().
+            post("/lines/{lineId}/sections", line.id()).
+            then().
+            log().all().
+            extract();
     }
 
     public static void 지하철_노선에_지하철역_등록됨(ExtractableResponse<Response> response) {
@@ -143,26 +144,27 @@ public class LineSectionAcceptanceTest extends AcceptanceTest {
         assertThat(response.statusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 
-    public static void 지하철_노선에_지하철역_순서_정렬됨(ExtractableResponse<Response> response, List<StationResponse> expectedStations) {
+    public static void 지하철_노선에_지하철역_순서_정렬됨(ExtractableResponse<Response> response,
+                                           List<StationResponse> expectedStations) {
         LineResponse line = response.as(LineResponse.class);
-        List<Long> stationIds = line.getStations().stream()
-                .map(it -> it.getId())
-                .collect(Collectors.toList());
+        List<Long> stationIds = line.stations().stream()
+            .map(it -> it.id())
+            .collect(Collectors.toList());
 
         List<Long> expectedStationIds = expectedStations.stream()
-                .map(it -> it.getId())
-                .collect(Collectors.toList());
+            .map(it -> it.id())
+            .collect(Collectors.toList());
 
         assertThat(stationIds).containsExactlyElementsOf(expectedStationIds);
     }
 
     public static ExtractableResponse<Response> 지하철_노선에_지하철역_제외_요청(LineResponse line, StationResponse station) {
         return RestAssured.given().log().all().
-                when().
-                delete("/lines/{lineId}/sections?stationId={stationId}", line.getId(), station.getId()).
-                then().
-                log().all().
-                extract();
+            when().
+            delete("/lines/{lineId}/sections?stationId={stationId}", line.id(), station.id()).
+            then().
+            log().all().
+            extract();
     }
 
     public static void 지하철_노선에_지하철역_제외됨(ExtractableResponse<Response> response) {

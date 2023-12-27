@@ -1,5 +1,10 @@
 package com.brainbackdoor.subwaymap.favorite;
 
+import static com.brainbackdoor.subwaymap.auth.acceptance.AuthAcceptanceTest.로그인_되어_있음;
+import static com.brainbackdoor.subwaymap.auth.acceptance.AuthAcceptanceTest.회원_등록되어_있음;
+import static com.brainbackdoor.subwaymap.line.acceptance.LineSectionAcceptanceTest.지하철_노선에_지하철역_등록_요청;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.brainbackdoor.subwaymap.AcceptanceTest;
 import com.brainbackdoor.subwaymap.auth.dto.TokenResponse;
 import com.brainbackdoor.subwaymap.line.acceptance.LineAcceptanceTest;
@@ -9,22 +14,17 @@ import com.brainbackdoor.subwaymap.station.dto.StationResponse;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.brainbackdoor.subwaymap.auth.acceptance.AuthAcceptanceTest.로그인_되어_있음;
-import static com.brainbackdoor.subwaymap.auth.acceptance.AuthAcceptanceTest.회원_등록되어_있음;
-import static com.brainbackdoor.subwaymap.line.acceptance.LineSectionAcceptanceTest.지하철_노선에_지하철역_등록_요청;
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DisplayName("즐겨찾기 관련 기능")
 public class FavoriteAcceptanceTest extends AcceptanceTest {
+
     public static final String EMAIL = "email@email.com";
     public static final String PASSWORD = "password";
 
@@ -49,8 +49,8 @@ public class FavoriteAcceptanceTest extends AcceptanceTest {
         lineCreateParams = new HashMap<>();
         lineCreateParams.put("name", "신분당선");
         lineCreateParams.put("color", "bg-red-600");
-        lineCreateParams.put("upStationId", 강남역.getId() + "");
-        lineCreateParams.put("downStationId", 광교역.getId() + "");
+        lineCreateParams.put("upStationId", 강남역.id() + "");
+        lineCreateParams.put("downStationId", 광교역.id() + "");
         lineCreateParams.put("distance", 10 + "");
         신분당선 = LineAcceptanceTest.지하철_노선_등록되어_있음(lineCreateParams).as(LineResponse.class);
 
@@ -80,43 +80,45 @@ public class FavoriteAcceptanceTest extends AcceptanceTest {
         즐겨찾기_삭제됨(deleteResponse);
     }
 
-    public static ExtractableResponse<Response> 즐겨찾기_생성을_요청(TokenResponse tokenResponse, StationResponse source, StationResponse target) {
+    public static ExtractableResponse<Response> 즐겨찾기_생성을_요청(TokenResponse tokenResponse, StationResponse source,
+                                                            StationResponse target) {
         Map<String, String> params = new HashMap<>();
-        params.put("source", source.getId() + "");
-        params.put("target", target.getId() + "");
+        params.put("source", source.id() + "");
+        params.put("target", target.id() + "");
 
         return RestAssured.given().log().all().
-                auth().oauth2(tokenResponse.getAccessToken()).
-                contentType(MediaType.APPLICATION_JSON_VALUE).
-                body(params).
-                when().
-                post("/favorites").
-                then().
-                log().all().
-                extract();
+            auth().oauth2(tokenResponse.accessToken()).
+            contentType(MediaType.APPLICATION_JSON_VALUE).
+            body(params).
+            when().
+            post("/favorites").
+            then().
+            log().all().
+            extract();
     }
 
     public static ExtractableResponse<Response> 즐겨찾기_목록_조회_요청(TokenResponse tokenResponse) {
         return RestAssured.given().log().all().
-                auth().oauth2(tokenResponse.getAccessToken()).
-                accept(MediaType.APPLICATION_JSON_VALUE).
-                when().
-                get("/favorites").
-                then().
-                log().all().
-                extract();
+            auth().oauth2(tokenResponse.accessToken()).
+            accept(MediaType.APPLICATION_JSON_VALUE).
+            when().
+            get("/favorites").
+            then().
+            log().all().
+            extract();
     }
 
-    public static ExtractableResponse<Response> 즐겨찾기_삭제_요청(TokenResponse tokenResponse, ExtractableResponse<Response> response) {
+    public static ExtractableResponse<Response> 즐겨찾기_삭제_요청(TokenResponse tokenResponse,
+                                                           ExtractableResponse<Response> response) {
         String uri = response.header("Location");
 
         return RestAssured.given().log().all().
-                auth().oauth2(tokenResponse.getAccessToken()).
-                when().
-                delete(uri).
-                then().
-                log().all().
-                extract();
+            auth().oauth2(tokenResponse.accessToken()).
+            when().
+            delete(uri).
+            then().
+            log().all().
+            extract();
     }
 
     public static void 즐겨찾기_생성됨(ExtractableResponse<Response> response) {

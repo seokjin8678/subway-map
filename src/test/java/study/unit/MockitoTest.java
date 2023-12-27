@@ -1,22 +1,22 @@
 package study.unit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.brainbackdoor.subwaymap.line.application.LineService;
 import com.brainbackdoor.subwaymap.line.domain.Line;
 import com.brainbackdoor.subwaymap.line.domain.LineRepository;
 import com.brainbackdoor.subwaymap.line.dto.LineResponse;
 import com.brainbackdoor.subwaymap.station.application.StationService;
-import com.google.common.collect.Lists;
+import java.util.List;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 @DisplayName("단위 테스트 - mockito를 활용한 가짜 협력 객체 사용")
-public class MockitoTest {
+class MockitoTest {
+
     @Test
     void findAllLines() {
         // given

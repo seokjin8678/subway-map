@@ -4,8 +4,9 @@ import com.brainbackdoor.subwaymap.line.domain.Section;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class SectionEdge extends DefaultWeightedEdge {
-    private Section section;
-    private Long lineId;
+
+    private final Section section;
+    private final Long lineId;
 
     public SectionEdge(Section section, Long lineId) {
         this.section = section;

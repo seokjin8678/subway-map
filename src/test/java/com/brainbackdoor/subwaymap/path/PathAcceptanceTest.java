@@ -1,5 +1,7 @@
 package com.brainbackdoor.subwaymap.path;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.brainbackdoor.subwaymap.AcceptanceTest;
 import com.brainbackdoor.subwaymap.line.acceptance.LineAcceptanceTest;
 import com.brainbackdoor.subwaymap.line.acceptance.LineSectionAcceptanceTest;
@@ -7,26 +9,24 @@ import com.brainbackdoor.subwaymap.line.dto.LineResponse;
 import com.brainbackdoor.subwaymap.map.dto.PathResponse;
 import com.brainbackdoor.subwaymap.station.StationAcceptanceTest;
 import com.brainbackdoor.subwaymap.station.dto.StationResponse;
-import com.google.common.collect.Lists;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 
 
 @DisplayName("지하철 경로 조회")
 public class PathAcceptanceTest extends AcceptanceTest {
+
     private LineResponse 신분당선;
     private LineResponse 이호선;
     private LineResponse 삼호선;
@@ -36,10 +36,7 @@ public class PathAcceptanceTest extends AcceptanceTest {
     private StationResponse 남부터미널역;
 
     /**
-     * 교대역    --- *2호선* ---   강남역
-     * |                        |
-     * *3호선*                   *신분당선*
-     * |                        |
+     * 교대역    --- *2호선* ---   강남역 |                        | *3호선*                   *신분당선* |                        |
      * 남부터미널역  --- *3호선* ---   양재
      */
     @BeforeEach
@@ -69,47 +66,49 @@ public class PathAcceptanceTest extends AcceptanceTest {
         총_거리와_소요_시간을_함께_응답함(response, 5);
     }
 
-    private LineResponse 지하철_노선_등록되어_있음(String name, String color, StationResponse upStation, StationResponse downStation, int distance) {
+    private LineResponse 지하철_노선_등록되어_있음(String name, String color, StationResponse upStation,
+                                        StationResponse downStation, int distance) {
         Map<String, String> lineCreateParams;
         lineCreateParams = new HashMap<>();
         lineCreateParams.put("name", name);
         lineCreateParams.put("color", color);
-        lineCreateParams.put("upStationId", upStation.getId() + "");
-        lineCreateParams.put("downStationId", downStation.getId() + "");
+        lineCreateParams.put("upStationId", upStation.id() + "");
+        lineCreateParams.put("downStationId", downStation.id() + "");
         lineCreateParams.put("distance", distance + "");
         return LineAcceptanceTest.지하철_노선_등록되어_있음(lineCreateParams).as(LineResponse.class);
     }
 
-    private void 지하철_노선에_지하철역_등록되어_있음(LineResponse line, StationResponse upStation, StationResponse downStation, int distance) {
+    private void 지하철_노선에_지하철역_등록되어_있음(LineResponse line, StationResponse upStation, StationResponse downStation,
+                                      int distance) {
         LineSectionAcceptanceTest.지하철_노선에_지하철역_등록_요청(line, upStation, downStation, distance);
     }
 
     public static ExtractableResponse<Response> 거리_경로_조회_요청(long source, long target) {
         return RestAssured.given().log().all().
-                accept(MediaType.APPLICATION_JSON_VALUE).
-                when().
-                get("/paths?source={sourceId}&target={targetId}", source, target).
-                then().
-                log().all().
-                extract();
+            accept(MediaType.APPLICATION_JSON_VALUE).
+            when().
+            get("/paths?source={sourceId}&target={targetId}", source, target).
+            then().
+            log().all().
+            extract();
     }
 
     public static void 적절한_경로를_응답(ExtractableResponse<Response> response, ArrayList<StationResponse> expectedPath) {
         PathResponse pathResponse = response.as(PathResponse.class);
 
-        List<Long> stationIds = pathResponse.getStations().stream()
-                .map(StationResponse::getId)
-                .collect(Collectors.toList());
+        List<Long> stationIds = pathResponse.stations().stream()
+            .map(StationResponse::id)
+            .collect(Collectors.toList());
 
         List<Long> expectedPathIds = expectedPath.stream()
-                .map(StationResponse::getId)
-                .collect(Collectors.toList());
+            .map(StationResponse::id)
+            .collect(Collectors.toList());
 
         assertThat(stationIds).containsExactlyElementsOf(expectedPathIds);
     }
 
     public static void 총_거리와_소요_시간을_함께_응답함(ExtractableResponse<Response> response, int totalDistance) {
         PathResponse pathResponse = response.as(PathResponse.class);
-        assertThat(pathResponse.getDistance()).isEqualTo(totalDistance);
+        assertThat(pathResponse.distance()).isEqualTo(totalDistance);
     }
 }

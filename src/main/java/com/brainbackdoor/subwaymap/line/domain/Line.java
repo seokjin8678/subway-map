@@ -3,16 +3,22 @@ package com.brainbackdoor.subwaymap.line.domain;
 
 import com.brainbackdoor.subwaymap.common.BaseEntity;
 import com.brainbackdoor.subwaymap.station.domain.Station;
-
-import javax.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Entity
 public class Line extends BaseEntity implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,7 +27,7 @@ public class Line extends BaseEntity implements Serializable {
     private String color;
 
     @OneToMany(mappedBy = "line", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    private List<Section> sections = new ArrayList<>();
+    private final List<Section> sections = new ArrayList<>();
 
     public Line() {
     }
@@ -63,20 +69,20 @@ public class Line extends BaseEntity implements Serializable {
             throw new IllegalArgumentException("라인에서 역을 제거할 수 없습니다.");
         }
 
-        Optional<Section> upLineStation = findUpstation(stationId);
+        Optional<Section> upLineStation = findUpStation(stationId);
         Optional<Section> downLineStation = findDownStation(stationId);
 
         if (upLineStation.isPresent() && downLineStation.isPresent()) {
             createSection(upLineStation.get(), downLineStation.get());
         }
 
-        upLineStation.ifPresent(it -> sections.remove(it));
-        downLineStation.ifPresent(it -> sections.remove(it));
+        upLineStation.ifPresent(sections::remove);
+        downLineStation.ifPresent(sections::remove);
     }
 
     public List<Station> getStations() {
         if (sections.isEmpty()) {
-            return Arrays.asList();
+            return Collections.emptyList();
         }
 
         return orderBySection();
@@ -187,7 +193,7 @@ public class Line extends BaseEntity implements Serializable {
             .findFirst();
     }
 
-    private Optional<Section> findUpstation(Long stationId) {
+    private Optional<Section> findUpStation(Long stationId) {
         return sections.stream()
             .filter(it -> it.equalUpStation(stationId))
             .findFirst();

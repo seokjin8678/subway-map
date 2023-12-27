@@ -2,15 +2,15 @@ package com.brainbackdoor.subwaymap.member.domain;
 
 import com.brainbackdoor.subwaymap.auth.application.AuthorizationException;
 import com.brainbackdoor.subwaymap.common.BaseEntity;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import java.util.Objects;
 
 @Entity
 public class Member extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -50,7 +50,7 @@ public class Member extends BaseEntity {
     }
 
     public void checkPassword(String password) {
-        if (!StringUtils.equals(this.password, password)) {
+        if (!Objects.equals(this.password, password)) {
             throw new AuthorizationException();
         }
     }

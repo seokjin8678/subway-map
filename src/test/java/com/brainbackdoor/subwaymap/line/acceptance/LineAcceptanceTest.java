@@ -1,5 +1,7 @@
 package com.brainbackdoor.subwaymap.line.acceptance;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.brainbackdoor.subwaymap.AcceptanceTest;
 import com.brainbackdoor.subwaymap.line.dto.LineResponse;
 import com.brainbackdoor.subwaymap.station.StationAcceptanceTest;
@@ -7,22 +9,20 @@ import com.brainbackdoor.subwaymap.station.dto.StationResponse;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DisplayName("지하철 노선 관련 기능")
 public class LineAcceptanceTest extends AcceptanceTest {
+
     private StationResponse 강남역;
     private StationResponse 광교역;
     private Map<String, String> lineCreateParams;
@@ -38,8 +38,8 @@ public class LineAcceptanceTest extends AcceptanceTest {
         lineCreateParams = new HashMap<>();
         lineCreateParams.put("name", "신분당선");
         lineCreateParams.put("color", "bg-red-600");
-        lineCreateParams.put("upStationId", 강남역.getId() + "");
-        lineCreateParams.put("downStationId", 광교역.getId() + "");
+        lineCreateParams.put("upStationId", 강남역.id() + "");
+        lineCreateParams.put("downStationId", 광교역.id() + "");
         lineCreateParams.put("distance", 10 + "");
     }
 
@@ -73,8 +73,8 @@ public class LineAcceptanceTest extends AcceptanceTest {
         Map<String, String> params = new HashMap<>();
         params.put("name", "구분당선");
         params.put("color", "bg-red-600");
-        params.put("upStationId", 강남역.getId() + "");
-        params.put("downStationId", 광교역.getId() + "");
+        params.put("upStationId", 강남역.id() + "");
+        params.put("downStationId", 광교역.id() + "");
         params.put("distance", 15 + "");
         ExtractableResponse<Response> createResponse1 = 지하철_노선_등록되어_있음(params);
         ExtractableResponse<Response> createResponse2 = 지하철_노선_등록되어_있음(lineCreateParams);
@@ -111,8 +111,8 @@ public class LineAcceptanceTest extends AcceptanceTest {
         Map<String, String> params = new HashMap<>();
         params.put("name", "구분당선");
         params.put("color", "bg-red-600");
-        params.put("upStationId", 강남역.getId() + "");
-        params.put("downStationId", 광교역.getId() + "");
+        params.put("upStationId", 강남역.id() + "");
+        params.put("downStationId", 광교역.id() + "");
         params.put("distance", 15 + "");
         ExtractableResponse<Response> response = 지하철_노선_수정_요청(createResponse, params);
 
@@ -139,69 +139,70 @@ public class LineAcceptanceTest extends AcceptanceTest {
 
     public static ExtractableResponse<Response> 지하철_노선_생성_요청(Map<String, String> params) {
         return RestAssured.given().log().all().
-                contentType(MediaType.APPLICATION_JSON_VALUE).
-                body(params).
-                when().
-                post("/lines").
-                then().
-                log().all().
-                extract();
+            contentType(MediaType.APPLICATION_JSON_VALUE).
+            body(params).
+            when().
+            post("/lines").
+            then().
+            log().all().
+            extract();
     }
 
     public static ExtractableResponse<Response> 지하철_노선_목록_조회_요청() {
         return RestAssured.given().log().all().
-                accept(MediaType.APPLICATION_JSON_VALUE).
-                when().
-                get("/lines").
-                then().
-                log().all().
-                extract();
+            accept(MediaType.APPLICATION_JSON_VALUE).
+            when().
+            get("/lines").
+            then().
+            log().all().
+            extract();
     }
 
     public static ExtractableResponse<Response> 지하철_노선_조회_요청(LineResponse response) {
         return RestAssured.given().log().all().
-                accept(MediaType.APPLICATION_JSON_VALUE).
-                when().
-                get("/lines/{lineId}", response.getId()).
-                then().
-                log().all().
-                extract();
+            accept(MediaType.APPLICATION_JSON_VALUE).
+            when().
+            get("/lines/{lineId}", response.id()).
+            then().
+            log().all().
+            extract();
     }
 
     public static ExtractableResponse<Response> 지하철_노선_조회_요청(ExtractableResponse<Response> response) {
         String uri = response.header("Location");
 
         return RestAssured.given().log().all().
-                accept(MediaType.APPLICATION_JSON_VALUE).
-                when().
-                get(uri).
-                then().
-                log().all().
-                extract();
+            accept(MediaType.APPLICATION_JSON_VALUE).
+            when().
+            get(uri).
+            then().
+            log().all().
+            extract();
     }
 
-    public static ExtractableResponse<Response> 지하철_노선_수정_요청(ExtractableResponse<Response> response, Map<String, String> params) {
+    public static ExtractableResponse<Response> 지하철_노선_수정_요청(ExtractableResponse<Response> response,
+                                                             Map<String, String> params) {
         String uri = response.header("Location");
 
         return RestAssured.given().log().all().
-                contentType(MediaType.APPLICATION_JSON_VALUE).
-                body(params).
-                when().
-                put(uri).
-                then().
-                log().all().
-                extract();
+            contentType(MediaType.APPLICATION_JSON_VALUE).
+            body(params).
+            when().
+            put(uri).
+            then().
+            log().all().
+            extract();
     }
 
     public static ExtractableResponse<Response> 지하철_노선_제거_요청(ExtractableResponse<Response> response) {
         String uri = response.header("Location");
 
         return RestAssured.given().log().all().
-                when().
-                delete(uri).
-                then().
-                log().all().
-                extract();
+            when().
+            delete(uri).
+            then().
+            log().all().
+            extract();
     }
 
     public static void 지하철_노선_생성됨(ExtractableResponse response) {
@@ -217,19 +218,21 @@ public class LineAcceptanceTest extends AcceptanceTest {
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
     }
 
-    public static void 지하철_노선_응답됨(ExtractableResponse<Response> response, ExtractableResponse<Response> createdResponse) {
+    public static void 지하철_노선_응답됨(ExtractableResponse<Response> response,
+                                  ExtractableResponse<Response> createdResponse) {
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.as(LineResponse.class)).isNotNull();
     }
 
-    public static void 지하철_노선_목록_포함됨(ExtractableResponse<Response> response, List<ExtractableResponse<Response>> createdResponses) {
+    public static void 지하철_노선_목록_포함됨(ExtractableResponse<Response> response,
+                                     List<ExtractableResponse<Response>> createdResponses) {
         List<Long> expectedLineIds = createdResponses.stream()
-                .map(it -> Long.parseLong(it.header("Location").split("/")[2]))
-                .collect(Collectors.toList());
+            .map(it -> Long.parseLong(it.header("Location").split("/")[2]))
+            .collect(Collectors.toList());
 
         List<Long> resultLineIds = response.jsonPath().getList(".", LineResponse.class).stream()
-                .map(LineResponse::getId)
-                .collect(Collectors.toList());
+            .map(LineResponse::id)
+            .collect(Collectors.toList());
 
         assertThat(resultLineIds).containsAll(expectedLineIds);
     }
