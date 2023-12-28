@@ -43,7 +43,7 @@ function startServer() {
     echo "$JAR_PATH 경로에 JAR 파일이 없거나 2개 이상입니다."
     exit 1
   fi
-  nohup java -jar -Duser.timezone=Asia/Seoul "$JAR_FILE" --spring.profiles.active="$PROFILE"1> ./log/app.log 2>&1 &
+  nohup java -jar -Duser.timezone=Asia/Seoul "$JAR_FILE" --spring.profiles.active="$PROFILE" 1> ./log/app.log 2>&1 &
 }
 
 pull
