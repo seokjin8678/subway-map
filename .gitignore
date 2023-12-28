@@ -37,3 +37,6 @@ out/
 
 ### Spring Profile ###
 /src/main/resources/application-local.yml
+
+### Log ###
+log/
